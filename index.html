@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogVerse — Modern Editorial Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HEADER / NAVIGATION
+  ════════════════════════════════════════════════════════════════ -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+
+        <!-- Brand -->
+        <a href="index.html" class="brand-logo">BlogVerse<span class="brand-dot">.</span></a>
+
+        <!-- Center Nav Links -->
+        <ul class="nav-links">
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="#explore">Explore</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="create-blog.html">Write</a></li>
+        </ul>
+
+        <!-- Right utility -->
+        <div class="nav-right">
+          <button class="theme-toggle-btn" type="button" aria-label="Toggle theme"></button>
+          <a href="login.html" class="btn btn-ghost btn-sm" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">Log in</a>
+          <a href="register.html" class="btn btn-primary btn-sm" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">Get started</a>
+          <button class="mobile-menu-btn" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="square" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HERO — Split editorial layout
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+
+        <!-- Left: Headline + CTA -->
+        <div>
+          <div class="hero-eyebrow">Independent Publishing Platform</div>
+          <h1 class="hero-title">
+            Write once,<br><em>reach everyone.</em>
+          </h1>
+          <p style="font-size:1rem; color:var(--text-secondary); line-height:1.7; max-width:420px; margin-bottom:2.5rem;">
+            A distraction-free platform built on clean fundamentals — no algorithms, no noise. Just your words and your readers.
+          </p>
+          <div class="hero-cta">
+            <a href="create-blog.html" class="btn btn-primary">Start writing</a>
+            <a href="register.html" class="btn btn-outline">Create account</a>
+          </div>
+        </div>
+
+        <!-- Right: Featured article preview -->
+        <div class="hero-featured">
+          <div class="hero-feat-label">Featured Article</div>
+          <img
+            class="hero-feat-img"
+            src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=80"
+            alt="Featured post cover"
+          >
+          <div class="hero-feat-category">Technology · 5 min read</div>
+          <h2 class="hero-feat-title">
+            Building Accessible Web Apps with Pure HTML & CSS
+          </h2>
+          <div class="hero-feat-meta">
+            By Elena Vance &mdash; Nov 18, 2026
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FEATURE STRIP — 4 platform highlights
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="feature-strip">
+    <div class="container">
+      <div class="feature-grid">
+
+        <div class="feat-card">
+          <div class="feat-card-num">01 — Get found</div>
+          <div class="feat-card-title">Search-first publishing</div>
+          <p class="feat-card-desc">Every post is structured for discovery — clean semantic markup, Open Graph metadata, and automatic sitemap generation.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-card-num">02 — Keep it current</div>
+          <div class="feat-card-title">Live draft revisions</div>
+          <p class="feat-card-desc">Edit your stories at any time. Update your design, refine copy, or pull a post back into draft without losing history.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-card-num">03 — Add more</div>
+          <div class="feat-card-title">Grow at your pace</div>
+          <p class="feat-card-desc">Start with a free blog and scale to newsletters, memberships, and monetisation as your audience expands.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-card-num">04 — Launch fast</div>
+          <div class="feat-card-title">Zero friction setup</div>
+          <p class="feat-card-desc">No build tools. No frameworks. No dependencies. Pure HTML and CSS — open in a browser and start publishing.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ARTICLE FEED — List / index layout
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="feed-section" id="explore">
+    <div class="container">
+
+      <!-- Filter Bar (sticky) -->
+      <div class="filter-bar" style="margin: 0 -2rem; padding: 0 2rem;">
+        <div class="filter-bar-inner">
+          <button class="filter-pill active" data-category="all">All articles</button>
+          <button class="filter-pill" data-category="tech">Technology</button>
+          <button class="filter-pill" data-category="design">Design</button>
+          <button class="filter-pill" data-category="career">Career</button>
+        </div>
+      </div>
+
+      <!-- Section header -->
+      <div class="feed-header" style="margin-top: 2.5rem;">
+        <h2>Latest articles</h2>
+        <span class="feed-count">6 articles</span>
+      </div>
+
+      <!-- Posts list -->
+      <div class="posts-list">
+
+        <!-- Post 1 -->
+        <a href="#" class="post-row" data-category="tech">
+          <div class="post-row-date">Nov 18<br>2026</div>
+          <div class="post-row-body">
+            <div class="post-row-category">Technology</div>
+            <div class="post-row-title">Building Accessible Web Apps with Pure HTML &amp; CSS</div>
+            <p class="post-row-excerpt">Semantic markup, CSS variables, and clean styling patterns allow you to build blazing-fast accessible applications without bloated libraries.</p>
+            <div class="post-row-meta">
+              <span class="post-row-author">
+                <img class="post-row-author-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=60&q=80" alt="Elena Vance">
+                Elena Vance
+              </span>
+              <span>5 min read</span>
+            </div>
+          </div>
+          <img class="post-row-thumb" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&q=80" alt="">
+        </a>
+
+        <!-- Post 2 -->
+        <a href="#" class="post-row" data-category="design">
+          <div class="post-row-date">Nov 16<br>2026</div>
+          <div class="post-row-body">
+            <div class="post-row-category">Design</div>
+            <div class="post-row-title">The Art of Digital Restraint: Why Minimalist UI Wins</div>
+            <p class="post-row-excerpt">Cluttered interfaces drive users away. Focusing on negative space, crisp typography, and intentional color palettes enhances readability and trust.</p>
+            <div class="post-row-meta">
+              <span class="post-row-author">
+                <img class="post-row-author-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80" alt="Marcus Chen">
+                Marcus Chen
+              </span>
+              <span>4 min read</span>
+            </div>
+          </div>
+          <img class="post-row-thumb" src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=400&q=80" alt="">
+        </a>
+
+        <!-- Post 3 -->
+        <a href="#" class="post-row" data-category="career">
+          <div class="post-row-date">Nov 12<br>2026</div>
+          <div class="post-row-body">
+            <div class="post-row-category">Career</div>
+            <div class="post-row-title">From Junior to Staff: Navigating the Modern Dev Roadmap</div>
+            <p class="post-row-excerpt">Technical chops only get you halfway. Communication tactics, system design habits, and sponsorship networks are what actually accelerate careers.</p>
+            <div class="post-row-meta">
+              <span class="post-row-author">
+                <img class="post-row-author-img" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=60&q=80" alt="Sarah Jenkins">
+                Sarah Jenkins
+              </span>
+              <span>6 min read</span>
+            </div>
+          </div>
+          <img class="post-row-thumb" src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80" alt="">
+        </a>
+
+        <!-- Post 4 -->
+        <a href="#" class="post-row" data-category="tech">
+          <div class="post-row-date">Nov 08<br>2026</div>
+          <div class="post-row-body">
+            <div class="post-row-category">Technology</div>
+            <div class="post-row-title">Deep Dive: Understanding Modern JavaScript Performance</div>
+            <p class="post-row-excerpt">Memory allocations, V8 engine optimisations, and event loop mechanics — write smooth, lag-free client-side code once you understand the runtime.</p>
+            <div class="post-row-meta">
+              <span class="post-row-author">
+                <img class="post-row-author-img" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=60&q=80" alt="David Rivera">
+                David Rivera
+              </span>
+              <span>8 min read</span>
+            </div>
+          </div>
+          <img class="post-row-thumb" src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80" alt="">
+        </a>
+
+        <!-- Post 5 -->
+        <a href="#" class="post-row" data-category="design">
+          <div class="post-row-date">Nov 04<br>2026</div>
+          <div class="post-row-body">
+            <div class="post-row-category">Design</div>
+            <div class="post-row-title">How to Architect a Living Design System with CSS Custom Properties</div>
+            <p class="post-row-excerpt">Tame styling chaos across teams by structuring scalable CSS token hierarchies and swappable theme layers from day one.</p>
+            <div class="post-row-meta">
+              <span class="post-row-author">
+                <img class="post-row-author-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=60&q=80" alt="Elena Vance">
+                Elena Vance
+              </span>
+              <span>5 min read</span>
+            </div>
+          </div>
+          <img class="post-row-thumb" src="https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=400&q=80" alt="">
+        </a>
+
+        <!-- Post 6 -->
+        <a href="#" class="post-row" data-category="career">
+          <div class="post-row-date">Oct 29<br>2026</div>
+          <div class="post-row-body">
+            <div class="post-row-category">Career</div>
+            <div class="post-row-title">Sustaining Remote Work Rhythm: Focus, Habits &amp; Rest</div>
+            <p class="post-row-excerpt">Working from anywhere sounds ideal until async overload hits. Practical boundary strategies for distributed engineering teams.</p>
+            <div class="post-row-meta">
+              <span class="post-row-author">
+                <img class="post-row-author-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80" alt="Marcus Chen">
+                Marcus Chen
+              </span>
+              <span>4 min read</span>
+            </div>
+          </div>
+          <img class="post-row-thumb" src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80" alt="">
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       NEWSLETTER CTA BAND
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="newsletter-band">
+    <div class="container">
+      <div class="newsletter-band-inner">
+        <div>
+          <h2>Ideas worth reading,<br><em>delivered weekly.</em></h2>
+          <p style="margin-top:1rem; opacity:0.7; font-size:0.9rem; line-height:1.6;">No ads. No sponsored posts. Just curated articles from our writers, every Friday morning.</p>
+        </div>
+        <form id="newsletterForm">
+          <div class="newsletter-form">
+            <input class="newsletter-input" type="email" placeholder="Your email address" required>
+            <button class="newsletter-submit" type="submit">Subscribe</button>
+          </div>
+          <p style="font-size:0.75rem; opacity:0.5; margin-top:0.75rem;">No spam. Unsubscribe at any time.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand-name">BlogVerse.</div>
+          <p class="footer-brand-desc">An independent publishing platform built with clean HTML5 & CSS3. No frameworks, no noise — just writing.</p>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Platform</div>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="create-blog.html">Create Blog</a></li>
+            <li><a href="login.html">Sign In</a></li>
+            <li><a href="register.html">Sign Up</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Topics</div>
+          <ul>
+            <li><a href="#explore">Technology</a></li>
+            <li><a href="#explore">Design</a></li>
+            <li><a href="#explore">Career</a></li>
+            <li><a href="#explore">Engineering</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Legal</div>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">RSS Feed</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 BlogVerse — Frontend Development Assignment</span>
+        <span>Built with Pure HTML · CSS · Vanilla JS</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
