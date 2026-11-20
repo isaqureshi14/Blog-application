@@ -21,7 +21,7 @@
         <div class="nav-right">
           <button class="theme-toggle-btn" type="button" aria-label="Toggle theme"></button>
           <a href="create-blog.html" class="btn btn-primary btn-sm" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">+ New post</a>
-          <a href="login.html" class="btn btn-ghost btn-sm" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">Sign out</a>
+          <a href="login.html" class="btn btn-ghost btn-sm logout-btn" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">Sign out</a>
           <button class="mobile-menu-btn" aria-label="Menu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="square" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
@@ -84,7 +84,7 @@
       <div class="stats-row">
         <div class="stat-block">
           <div class="stat-label">Total articles</div>
-          <div class="stat-value">12</div>
+          <div class="stat-value" id="statTotal">12</div>
           <div class="stat-delta">+2 this month</div>
         </div>
         <div class="stat-block">
@@ -123,7 +123,7 @@
                 <th style="text-align:right;">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="dashPostsBody">
               <tr>
                 <td class="td-title">Building Accessible Web Apps with Pure HTML &amp; CSS</td>
                 <td class="td-category">Technology</td>
