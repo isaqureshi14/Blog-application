@@ -74,10 +74,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// ── Indexes ───────────────────────────────────────────────────────────
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-
 // ── Pre-save: hash password ───────────────────────────────────────────
 userSchema.pre('save', async function (next) {
   // Only hash if password was modified (new user or password change)

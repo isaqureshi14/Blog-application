@@ -38,11 +38,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc:  ["'self'"],
-        styleSrc:   ["'self'", 'https://fonts.googleapis.com'],
+        scriptSrc:  ["'self'", "'unsafe-inline'"],
+        styleSrc:   ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc:    ["'self'", 'https://fonts.gstatic.com'],
         imgSrc:     ["'self'", 'data:', 'https://images.unsplash.com'],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", 'http://localhost:5000', 'http://127.0.0.1:5000'],
         frameSrc:   ["'none'"],
         objectSrc:  ["'none'"],
       },
@@ -132,9 +132,17 @@ app.get('/api/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/blogs', blogRoutes);
 
-// ── 14. 404 handler — catch all unmatched routes ─────────────────────
-app.all('*', (req, res, next) => {
+// ── 14. Serve Frontend Static Files ──────────────────────────────────
+app.use(express.static(path.join(__dirname, '..')));
+
+// ── 15. 404 handler — catch all unmatched API routes ───────────────────
+app.all('/api/*', (req, res, next) => {
   next(new AppError(`Cannot find '${req.originalUrl}' on this server.`, 404));
+});
+
+// Fallback to index.html for unknown frontend routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // ── 15. Global error handler ──────────────────────────────────────────

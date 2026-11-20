@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article — BlogVerse</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <a href="index.html" class="brand-logo">BlogVerse<span class="brand-dot">.</span></a>
+
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#explore">Explore</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="create-blog.html">Write</a></li>
+        </ul>
+
+        <div class="nav-right">
+          <button class="theme-toggle-btn" type="button" aria-label="Toggle theme"></button>
+          <a href="login.html" class="btn btn-ghost btn-sm" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">Log in</a>
+          <a href="register.html" class="btn btn-primary btn-sm" style="border-left:1px solid var(--border); height:var(--header-height); padding:0 1.25rem; border-top:none; border-bottom:none; border-right:none;">Get started</a>
+          <button class="mobile-menu-btn" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="square" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Article Detail Main -->
+  <main style="flex: 1; padding: 4rem 0 6rem;">
+    <article class="container-prose" id="articleContainer">
+
+      <!-- Breadcrumbs / Back link -->
+      <div style="margin-bottom: 2rem;">
+        <a href="index.html#explore" style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.4rem;">
+          &larr; Back to all articles
+        </a>
+      </div>
+
+      <!-- Article Header -->
+      <header style="margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 2.5rem;">
+        <div id="articleCategory" style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem;">
+          Technology
+        </div>
+
+        <h1 id="articleTitle" style="font-family: var(--font-serif); font-size: clamp(2.25rem, 4.5vw, 3.5rem); font-weight: 400; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.75rem; color: var(--text-primary);">
+          Building Accessible Web Apps with Pure HTML &amp; CSS
+        </h1>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img id="authorAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Author" style="width: 32px; height: 32px; object-fit: cover; filter: grayscale(100%);">
+            <div>
+              <span id="articleAuthor" style="color: var(--text-primary); font-weight: 600;">Elena Vance</span>
+              <span style="margin: 0 0.4rem;">&middot;</span>
+              <span id="articleDate">Nov 18, 2026</span>
+            </div>
+          </div>
+          <div>
+            <span id="articleReadTime">5 min read</span>
+            <span style="margin: 0 0.4rem;">&middot;</span>
+            <span id="articleViews">8,420 views</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Featured Cover Image -->
+      <div id="coverWrapper" style="margin-bottom: 3rem;">
+        <img id="articleCover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" alt="Article Cover" style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: grayscale(15%); display: block;">
+      </div>
+
+      <!-- Article Body Content -->
+      <div id="articleContent" style="font-size: 1.05rem; line-height: 1.8; color: var(--text-primary); margin-bottom: 3.5rem;">
+        <p style="margin-bottom: 1.5rem; font-size: 1.15rem; line-height: 1.7; color: var(--text-secondary);">
+          Discover how semantic markup, CSS variables, and clean styling patterns allow you to build blazing-fast accessible applications without bloated libraries or fragile abstractions.
+        </p>
+
+        <h2 style="font-family: var(--font-serif); font-size: 1.85rem; font-weight: 400; margin: 2.5rem 0 1rem; color: var(--text-primary);">
+          The Over-Engineering Trap
+        </h2>
+        <p style="margin-bottom: 1.5rem;">
+          In contemporary web development, the instinct is often to install a heavyweight UI framework before writing a single line of business logic. But modern browser standards have evolved dramatically. Native CSS Grid, Flexbox, custom properties, and semantic HTML5 elements provide all the building blocks required to craft responsive, resilient user interfaces.
+        </p>
+
+        <blockquote style="margin: 2rem 0; padding: 1.25rem 2rem; border-left: 3px solid var(--text-primary); background: var(--bg-subtle); font-family: var(--font-serif); font-style: italic; font-size: 1.25rem; color: var(--text-primary);">
+          "Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."
+        </blockquote>
+
+        <h2 style="font-family: var(--font-serif); font-size: 1.85rem; font-weight: 400; margin: 2.5rem 0 1rem; color: var(--text-primary);">
+          Semantic Foundations
+        </h2>
+        <p style="margin-bottom: 1.5rem;">
+          Screen readers and assistive devices rely fundamentally on meaningful document outlines. Using proper heading hierarchies (<code>h1</code> through <code>h6</code>), native landmarks (<code>header</code>, <code>nav</code>, <code>main</code>, <code>article</code>, <code>footer</code>), and keyboard-navigable interactive controls ensures that every reader experiences the full narrative without artificial barriers.
+        </p>
+      </div>
+
+      <!-- Tags & Share Bar -->
+      <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-bottom: 3rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div id="articleTags" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border: 1px solid var(--border); color: var(--text-secondary);">#HTML</span>
+          <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border: 1px solid var(--border); color: var(--text-secondary);">#CSS</span>
+          <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border: 1px solid var(--border); color: var(--text-secondary);">#ACCESSIBILITY</span>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(window.location.href); alert('Article URL copied to clipboard!');">
+          Share Article
+        </button>
+      </div>
+
+      <!-- Author Bio Box -->
+      <section style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 2rem; display: flex; gap: 1.5rem; align-items: center;">
+        <img id="authorBioAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Author" style="width: 56px; height: 56px; object-fit: cover; filter: grayscale(100%); flex-shrink: 0;">
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">Written by</div>
+          <div id="authorBioName" style="font-family: var(--font-serif); font-size: 1.25rem; font-weight: 400; color: var(--text-primary); margin-bottom: 0.4rem;">Elena Vance</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            Principal Engineer and writer focusing on web performance, accessibility, and minimal software design systems.
+          </p>
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand-name">BlogVerse.</div>
+          <p class="footer-brand-desc">An independent publishing platform built with clean HTML5 &amp; CSS3. No frameworks, no noise — just writing.</p>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Platform</div>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="create-blog.html">Create Blog</a></li>
+            <li><a href="login.html">Sign In</a></li>
+            <li><a href="register.html">Sign Up</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Topics</div>
+          <ul>
+            <li><a href="index.html#explore">Technology</a></li>
+            <li><a href="index.html#explore">Design</a></li>
+            <li><a href="index.html#explore">Career</a></li>
+            <li><a href="index.html#explore">Engineering</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Legal</div>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">RSS Feed</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 BlogVerse — Frontend &amp; Backend Development</span>
+        <span>Built with Pure HTML · CSS · Node.js · MongoDB</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

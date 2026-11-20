@@ -7,7 +7,9 @@
   'use strict';
 
   /* ── Config ──────────────────────────────────────────────────────── */
-  const API_BASE = 'http://localhost:5000/api/v1';
+  const API_BASE = (typeof window !== 'undefined' && window.location.origin.includes(':5000'))
+    ? '/api/v1'
+    : 'http://localhost:5000/api/v1';
 
   /* ── Theme ───────────────────────────────────────────────────────── */
   const THEME_KEY = 'bv_theme';
@@ -285,6 +287,7 @@
           <td style="text-align:right;">
             <div class="row-actions" style="justify-content:flex-end;">
               <a href="create-blog.html?edit=${escapeHtml(b._id)}" class="btn btn-ghost btn-sm">Edit</a>
+              <a href="blog-detail.html?id=${escapeHtml(b._id)}" class="btn btn-ghost btn-sm">View</a>
               <button type="button" class="btn btn-ghost btn-sm action-btn delete" data-id="${escapeHtml(b._id)}">Delete</button>
             </div>
           </td>
@@ -336,7 +339,7 @@
       }
 
       feedList.innerHTML = blogs.map(b => `
-        <a href="#" class="post-row" data-category="${escapeHtml(b.category)}">
+        <a href="blog-detail.html?id=${escapeHtml(b._id)}" class="post-row" data-category="${escapeHtml(b.category)}">
           <div class="post-row-date">${formatDateShort(b.createdAt)}</div>
           <div class="post-row-body">
             <div class="post-row-category">${escapeHtml(b.category)}</div>
@@ -347,6 +350,7 @@
               <span>${b.readTime || 1} min read</span>
             </div>
           </div>
+          ${b.coverImage ? `<img class="post-row-thumb" src="${escapeHtml(b.coverImage)}" alt="">` : ''}
         </a>
       `).join('');
 
@@ -368,6 +372,97 @@
         window.location.href = 'login.html';
       });
     });
+  }
+
+  // ---- Blog Detail Page ----
+  async function initBlogDetail() {
+    const articleContainer = document.getElementById('articleContainer');
+    if (!articleContainer) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const blogId = params.get('id');
+    if (!blogId) return;
+
+    try {
+      const res = await apiFetch(`/blogs/${encodeURIComponent(blogId)}`);
+      const blog = res.data?.blog;
+      if (!blog) return;
+
+      document.title = `${blog.title} — BlogVerse`;
+
+      const catEl = document.getElementById('articleCategory');
+      if (catEl) catEl.textContent = blog.category;
+
+      const titleEl = document.getElementById('articleTitle');
+      if (titleEl) titleEl.textContent = blog.title;
+
+      const authorEl = document.getElementById('articleAuthor');
+      if (authorEl) authorEl.textContent = blog.author?.name || 'Anonymous';
+
+      const bioNameEl = document.getElementById('authorBioName');
+      if (bioNameEl) bioNameEl.textContent = blog.author?.name || 'Anonymous';
+
+      const dateEl = document.getElementById('articleDate');
+      if (dateEl) dateEl.textContent = formatDate(blog.createdAt);
+
+      const readTimeEl = document.getElementById('articleReadTime');
+      if (readTimeEl) readTimeEl.textContent = `${blog.readTime || 1} min read`;
+
+      const viewsEl = document.getElementById('articleViews');
+      if (viewsEl) viewsEl.textContent = `${blog.views || 1} views`;
+
+      const coverWrapper = document.getElementById('coverWrapper');
+      const coverImg = document.getElementById('articleCover');
+      if (blog.coverImage && coverImg) {
+        coverImg.src = blog.coverImage;
+        coverWrapper.style.display = 'block';
+      } else if (!blog.coverImage && coverWrapper) {
+        coverWrapper.style.display = 'none';
+      }
+
+      const contentEl = document.getElementById('articleContent');
+      if (contentEl) {
+        contentEl.innerHTML = parseMarkdownToHtml(blog.content);
+      }
+
+      const tagsEl = document.getElementById('articleTags');
+      if (tagsEl && Array.isArray(blog.tags) && blog.tags.length > 0) {
+        tagsEl.innerHTML = blog.tags.map(t => `
+          <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border: 1px solid var(--border); color: var(--text-secondary);">#${escapeHtml(t)}</span>
+        `).join('');
+      }
+    } catch (err) {
+      console.warn('[BlogVerse] Failed to fetch article details:', err.message);
+    }
+  }
+
+  function parseMarkdownToHtml(text) {
+    if (!text) return '';
+    const safe = escapeHtml(text);
+    return safe
+      .split('\n\n')
+      .map(block => {
+        const trimmed = block.trim();
+        if (trimmed.startsWith('## ')) {
+          return `<h2 style="font-family: var(--font-serif); font-size: 1.85rem; font-weight: 400; margin: 2.5rem 0 1rem; color: var(--text-primary);">${trimmed.slice(3)}</h2>`;
+        }
+        if (trimmed.startsWith('# ')) {
+          return `<h1 style="font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400; margin: 2.5rem 0 1rem; color: var(--text-primary);">${trimmed.slice(2)}</h1>`;
+        }
+        if (trimmed.startsWith('> ')) {
+          return `<blockquote style="margin: 2rem 0; padding: 1.25rem 2rem; border-left: 3px solid var(--text-primary); background: var(--bg-subtle); font-family: var(--font-serif); font-style: italic; font-size: 1.25rem; color: var(--text-primary);">${trimmed.slice(2)}</blockquote>`;
+        }
+        if (trimmed.startsWith('- ')) {
+          const items = trimmed.split('\n').map(li => `<li>${li.replace(/^-\s*/, '')}</li>`).join('');
+          return `<ul style="margin: 1.25rem 0 1.25rem 1.5rem; list-style: disc;">${items}</ul>`;
+        }
+        let p = trimmed
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/`([^`]+)`/g, '<code style="background:var(--bg-inset); padding:0.15rem 0.35rem; font-family:var(--font-mono); font-size:0.88em;">$1</code>');
+        return `<p style="margin-bottom: 1.5rem;">${p}</p>`;
+      })
+      .join('');
   }
 
   /* ── Security helpers ────────────────────────────────────────────── */
@@ -501,6 +596,7 @@
     initCreateBlogForm();
     initDashboard();
     initHomeFeed();
+    initBlogDetail();
   });
 
 })();
