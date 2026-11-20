@@ -177,12 +177,31 @@
     }
   }
 
+  /* ── Form Alert Helpers ────────────────────────────────────────── */
+  function showFormAlert(alertEl, message, isError = true) {
+    if (!alertEl) return;
+    alertEl.textContent = message;
+    alertEl.style.display = 'block';
+    alertEl.style.background = isError ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)';
+    alertEl.style.borderLeftColor = isError ? '#ef4444' : '#10b981';
+    alertEl.style.color = isError ? '#ef4444' : '#10b981';
+  }
+
+  function hideFormAlert(alertEl) {
+    if (alertEl) {
+      alertEl.style.display = 'none';
+      alertEl.textContent = '';
+    }
+  }
+
   /* ── Page handlers ────────────────────────────────────────────────── */
 
   // ---- Login form ----
   async function initLoginForm() {
     const form = document.getElementById('loginForm');
     if (!form) return;
+
+    const alertEl = document.getElementById('authAlert');
 
     // If user is already authenticated, redirect to dashboard or redirect param
     const cachedUser = await checkAuth();
@@ -192,20 +211,77 @@
       return;
     }
 
+    // Prefill remembered email if available
+    const savedEmail = localStorage.getItem('bv_remember_email');
+    if (savedEmail && form.email) {
+      form.email.value = savedEmail;
+      const rememberCheckbox = document.getElementById('remember');
+      if (rememberCheckbox) rememberCheckbox.checked = true;
+    }
+
+    // Clear alert when user types
+    form.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', () => {
+        hideFormAlert(alertEl);
+        input.style.borderColor = '';
+      });
+    });
+
+    // Wire "Forgot password?"
+    const forgotLink = document.getElementById('forgotPwdLink');
+    if (forgotLink) {
+      forgotLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const enteredEmail = form.email ? form.email.value.trim() : '';
+        if (enteredEmail) {
+          toast(`Password reset instructions would be sent to ${enteredEmail}. (Demo environment: please use alex@blogverse.com / Password123! or register a new account)`);
+        } else {
+          toast('Please enter your email address to reset password.', 'error');
+          if (form.email) form.email.focus();
+        }
+      });
+    }
+
+    // Wire "Continue with Google"
+    const googleBtn = document.getElementById('googleSignInBtn');
+    if (googleBtn) {
+      googleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast('Google Sign-In is disabled. Please sign in with your email & password.');
+        showFormAlert(alertEl, 'Google Sign-In is disabled. Please enter your email and password below.');
+      });
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideFormAlert(alertEl);
+
       const btn = form.querySelector('button[type="submit"]');
-      setButtonLoading(btn, true);
-
-      // Sanitize inputs client-side (server also validates)
-      const email    = form.email.value.trim().toLowerCase();
+      const email = form.email.value.trim().toLowerCase();
       const password = form.password.value;
+      const remember = document.getElementById('remember')?.checked;
 
+      // Reset styling
+      form.email.style.borderColor = '';
+      form.password.style.borderColor = '';
+
+      // Validation
       if (!email || !password) {
+        showFormAlert(alertEl, 'Please enter both your email address and password.');
         toast('Please fill in all fields.', 'error');
-        setButtonLoading(btn, false);
+        if (!email) form.email.style.borderColor = '#ef4444';
+        if (!password) form.password.style.borderColor = '#ef4444';
         return;
       }
+
+      if (password.length < 8) {
+        showFormAlert(alertEl, 'Password must be at least 8 characters long.');
+        form.password.style.borderColor = '#ef4444';
+        toast('Password must be at least 8 characters.', 'error');
+        return;
+      }
+
+      setButtonLoading(btn, true);
 
       try {
         const data = await apiFetch('/auth/login', {
@@ -213,13 +289,25 @@
           body:   { email, password },
         });
 
+        // Save or remove remembered email
+        if (remember) {
+          localStorage.setItem('bv_remember_email', email);
+        } else {
+          localStorage.removeItem('bv_remember_email');
+        }
+
         setLoggedIn(true);
         sessionStorage.setItem('bv_user', JSON.stringify(data.data.user));
         toast(`Welcome back, ${data.data.user.name}!`);
+
         const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || 'dashboard.html';
         setTimeout(() => { window.location.href = redirectUrl; }, 600);
       } catch (err) {
-        toast(err.message, 'error');
+        form.email.style.borderColor = '#ef4444';
+        form.password.style.borderColor = '#ef4444';
+        const msg = err.message || 'Incorrect email or password.';
+        showFormAlert(alertEl, msg);
+        toast(msg, 'error');
         setButtonLoading(btn, false);
       }
     });
@@ -230,6 +318,8 @@
     const form = document.getElementById('registerForm');
     if (!form) return;
 
+    const alertEl = document.getElementById('authAlert');
+
     // If user is already authenticated, redirect to dashboard
     const cachedUser = await checkAuth();
     if (cachedUser) {
@@ -237,23 +327,112 @@
       return;
     }
 
+    // Real-time password matching check
+    const pwdInput = document.getElementById('regPassword');
+    const confirmInput = document.getElementById('confirmPassword');
+
+    function checkPasswordMatch() {
+      if (!confirmInput.value) {
+        confirmInput.style.borderColor = '';
+        return;
+      }
+      if (pwdInput.value !== confirmInput.value) {
+        confirmInput.style.borderColor = '#ef4444';
+        showFormAlert(alertEl, 'Passwords do not match.');
+      } else {
+        confirmInput.style.borderColor = '#10b981';
+        hideFormAlert(alertEl);
+      }
+    }
+
+    if (pwdInput && confirmInput) {
+      pwdInput.addEventListener('input', checkPasswordMatch);
+      confirmInput.addEventListener('input', checkPasswordMatch);
+    }
+
+    // Clear alert when user types in any input
+    form.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', () => {
+        input.style.borderColor = '';
+      });
+    });
+
+    // Wire Terms & Privacy links
+    const termsLink = document.getElementById('termsLink');
+    if (termsLink) {
+      termsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast('Terms of Service: You own 100% of the content you publish on BlogVerse.');
+      });
+    }
+
+    const privacyLink = document.getElementById('privacyLink');
+    if (privacyLink) {
+      privacyLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast('Privacy Policy: BlogVerse does not track, sell, or profile user data.');
+      });
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = form.querySelector('button[type="submit"]');
-      setButtonLoading(btn, true);
+      hideFormAlert(alertEl);
 
-      const name            = form.firstName.value.trim() + ' ' + form.lastName.value.trim();
+      const btn = form.querySelector('button[type="submit"]');
+
+      const firstName       = form.firstName.value.trim();
+      const lastName        = form.lastName.value.trim();
+      const name            = `${firstName} ${lastName}`.trim();
       const username        = form.username.value.trim().toLowerCase();
       const email           = form.regEmail.value.trim().toLowerCase();
       const password        = form.regPassword.value;
       const confirmPassword = form.confirmPassword ? form.confirmPassword.value : password;
 
-      // Basic client-side checks (server validates fully)
-      if (!name.trim() || !username || !email || !password) {
-        toast('Please fill in all required fields.', 'error');
-        setButtonLoading(btn, false);
+      // Validation
+      if (!firstName || !lastName) {
+        showFormAlert(alertEl, 'Please provide both your first name and last name.');
+        toast('Please enter your full name.', 'error');
+        if (!firstName) form.firstName.style.borderColor = '#ef4444';
+        if (!lastName) form.lastName.style.borderColor = '#ef4444';
         return;
       }
+
+      if (!username || username.length < 3) {
+        showFormAlert(alertEl, 'Username must be at least 3 characters long.');
+        form.username.style.borderColor = '#ef4444';
+        toast('Username must be at least 3 characters.', 'error');
+        return;
+      }
+
+      if (!/^[a-z0-9_]+$/.test(username)) {
+        showFormAlert(alertEl, 'Username may only contain lowercase letters, numbers, and underscores (no spaces).');
+        form.username.style.borderColor = '#ef4444';
+        toast('Username may only contain letters, numbers, and underscores.', 'error');
+        return;
+      }
+
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        showFormAlert(alertEl, 'Please provide a valid email address.');
+        form.regEmail.style.borderColor = '#ef4444';
+        toast('Invalid email address.', 'error');
+        return;
+      }
+
+      if (password.length < 8) {
+        showFormAlert(alertEl, 'Password must be at least 8 characters long.');
+        form.regPassword.style.borderColor = '#ef4444';
+        toast('Password must be at least 8 characters.', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showFormAlert(alertEl, 'Passwords do not match. Please verify your password confirmation.');
+        form.confirmPassword.style.borderColor = '#ef4444';
+        toast('Passwords do not match.', 'error');
+        return;
+      }
+
+      setButtonLoading(btn, true);
 
       try {
         const data = await apiFetch('/auth/register', {
@@ -266,7 +445,9 @@
         toast('Account created! Welcome to BlogVerse.');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
       } catch (err) {
-        toast(err.message, 'error');
+        const msg = err.message || 'Registration failed. Please check your details.';
+        showFormAlert(alertEl, msg);
+        toast(msg, 'error');
         setButtonLoading(btn, false);
       }
     });
@@ -498,7 +679,6 @@
       }
     }
   }
-  }
 
   // ---- Homepage blog feed with Search & Category Filters ----
   async function loadHomeFeed(category = 'all', searchQuery = '') {
@@ -676,6 +856,19 @@
           }
         };
       }
+
+      // Share button
+      const shareBtn = document.getElementById('shareArticleBtn');
+      if (shareBtn) {
+        shareBtn.onclick = () => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href);
+            toast('Article link copied to clipboard!');
+          } else {
+            toast(`Article URL: ${window.location.href}`);
+          }
+        };
+      }
     } catch (err) {
       console.warn('[BlogVerse] Failed to fetch article details:', err.message);
     }
@@ -820,6 +1013,38 @@
     });
   }
 
+  function initLegalAndActionLinks() {
+    document.querySelectorAll('.site-footer a[href="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const text = link.textContent.trim();
+        if (text.includes('RSS')) {
+          toast('RSS Feed endpoint: /api/v1/blogs?limit=50 (JSON feed active)');
+        } else if (text.includes('Cookie')) {
+          toast('Cookie Policy: BlogVerse uses only essential secure httpOnly session cookies.');
+        } else if (text.includes('Privacy')) {
+          toast('Privacy Policy: BlogVerse collects zero telemetry or third-party tracker data.');
+        } else if (text.includes('Terms')) {
+          toast('Terms of Service: You own 100% of all published editorial content.');
+        }
+      });
+    });
+
+    // Sidebar settings link in dashboard
+    document.querySelectorAll('.dash-nav-link').forEach(link => {
+      if (link.textContent.trim().toLowerCase().includes('settings')) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const profilePanel = document.getElementById('profilePanel');
+          if (profilePanel) {
+            profilePanel.scrollIntoView({ behavior: 'smooth' });
+            toast('Account settings: Standard Author tier active.');
+          }
+        });
+      }
+    });
+  }
+
   /* ── Boot ────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', () => {
     // Theme
@@ -835,6 +1060,7 @@
     initImagePreview();
     initEditorToolbar();
     initNewsletter();
+    initLegalAndActionLinks();
     initLogout();
     initLoginForm();
     initRegisterForm();

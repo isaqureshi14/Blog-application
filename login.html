@@ -34,13 +34,37 @@
   ════════════════════════════════════════════════════════════════ -->
   <main class="auth-wrapper">
 
-    <!-- Left: Brand sidebar -->
-    <div class="auth-sidebar">
-      <div class="auth-sidebar-brand">BlogVerse.</div>
-      <blockquote class="auth-sidebar-quote">
-        "The scariest moment is always just before you start. After that, things can only get better."
-        <cite>— Stephen King, On Writing</cite>
-      </blockquote>
+    <!-- Left: Brand sidebar with curated editorial photography -->
+    <div class="auth-sidebar" style="position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between;">
+      <img src="https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1200&q=80" alt="Books and study" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(100%) brightness(0.2) contrast(1.2); pointer-events:none; z-index:0;">
+      
+      <div style="position:relative; z-index:1; display:flex; flex-direction:column; justify-content:space-between; height:100%; gap:2rem;">
+        <div>
+          <div class="auth-sidebar-brand">BlogVerse<span class="brand-dot">.</span></div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.7); margin-top:0.4rem;">
+            Welcome Back to Your Workspace
+          </div>
+        </div>
+
+        <!-- Featured editorial photograph card -->
+        <div style="border:1px solid rgba(255,255,255,0.18); background:rgba(0,0,0,0.55); backdrop-filter:blur(10px); padding:1.25rem;">
+          <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80" alt="Editorial craft" style="width:100%; height:190px; object-fit:cover; filter:grayscale(100%); margin-bottom:1.15rem; border:1px solid rgba(255,255,255,0.12); display:block;">
+          <blockquote class="auth-sidebar-quote" style="font-size:1.1rem; line-height:1.45; margin:0; color:#fff;">
+            "The scariest moment is always just before you start. After that, things can only get better."
+            <cite style="color:rgba(255,255,255,0.6); margin-top:0.6rem;">— Stephen King, On Writing</cite>
+          </blockquote>
+        </div>
+
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:0.75rem;">Verified Access</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; font-family:var(--font-mono); font-size:0.7rem; color:rgba(255,255,255,0.85);">
+            <div><span style="color:#10b981;">✓</span> Encrypted JWT</div>
+            <div><span style="color:#10b981;">✓</span> httpOnly Cookie</div>
+            <div><span style="color:#10b981;">✓</span> Rate Limited</div>
+            <div><span style="color:#10b981;">✓</span> Instant Dashboard</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Right: Form panel -->
@@ -49,6 +73,8 @@
         <h1>Sign in</h1>
         <p>Welcome back. Enter your credentials to continue.</p>
       </div>
+
+      <div id="authAlert" style="display:none; padding:0.75rem 1rem; margin-bottom:1.5rem; background:rgba(239,68,68,0.08); border-left:3px solid #ef4444; color:#ef4444; font-family:var(--font-mono); font-size:0.75rem; letter-spacing:0.02em;"></div>
 
       <form id="loginForm">
         <div class="form-group">
@@ -66,14 +92,14 @@
             <input type="checkbox" id="remember">
             <span>Remember me</span>
           </label>
-          <a href="#" class="auth-link">Forgot password?</a>
+          <a href="#" class="auth-link forgot-pwd-link" id="forgotPwdLink">Forgot password?</a>
         </div>
 
         <button type="submit" class="btn btn-primary" style="width:100%; height:48px;">Sign in</button>
 
         <div class="auth-divider">or</div>
 
-        <button type="button" class="btn btn-outline" style="width:100%; height:48px; gap:0.75rem;" onclick="alert('Google sign-in — backend coming soon.')">
+        <button type="button" class="btn btn-outline" id="googleSignInBtn" style="width:100%; height:48px; gap:0.75rem;">
           <svg width="16" height="16" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
