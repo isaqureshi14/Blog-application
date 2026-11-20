@@ -113,16 +113,68 @@
   }
 
   function getToken() {
-    // The JWT is in an httpOnly cookie — we can't read it from JS (by design).
-    // We instead rely on cookies:include in apiFetch.
-    // We store a lightweight "is logged in" flag in sessionStorage
-    // only to show/hide UI elements — NOT for security decisions.
     return sessionStorage.getItem('bv_logged_in') === '1';
   }
 
   function setLoggedIn(val) {
     if (val) sessionStorage.setItem('bv_logged_in', '1');
-    else      sessionStorage.removeItem('bv_logged_in');
+    else {
+      sessionStorage.removeItem('bv_logged_in');
+      sessionStorage.removeItem('bv_user');
+    }
+  }
+
+  /* ── Authentication & Route Guards ───────────────────────────────── */
+  let currentUserCache = null;
+
+  async function checkAuth() {
+    try {
+      const res = await apiFetch('/auth/me');
+      const user = res.data?.user;
+      if (user) {
+        currentUserCache = user;
+        setLoggedIn(true);
+        sessionStorage.setItem('bv_user', JSON.stringify(user));
+        return user;
+      }
+    } catch (_) {
+      currentUserCache = null;
+      setLoggedIn(false);
+    }
+    return null;
+  }
+
+  async function requireAuth() {
+    const user = await checkAuth();
+    if (!user) {
+      toast('Please log in to continue.', 'error');
+      const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
+      window.location.href = `login.html?redirect=${encodeURIComponent(currentPath)}`;
+      return null;
+    }
+    return user;
+  }
+
+  function updateAuthNav(user) {
+    const navRight = document.querySelector('.nav-right');
+    if (!navRight) return;
+
+    if (user) {
+      // Find login / register buttons on public pages and update to auth state
+      const loginBtn = navRight.querySelector('a[href="login.html"]');
+      const registerBtn = navRight.querySelector('a[href="register.html"]');
+
+      if (loginBtn) {
+        loginBtn.textContent = user.name || 'Dashboard';
+        loginBtn.href = 'dashboard.html';
+      }
+      if (registerBtn) {
+        registerBtn.textContent = 'Sign out';
+        registerBtn.href = '#';
+        registerBtn.classList.remove('btn-primary');
+        registerBtn.classList.add('btn-ghost', 'logout-btn');
+      }
+    }
   }
 
   /* ── Page handlers ────────────────────────────────────────────────── */
@@ -131,6 +183,14 @@
   async function initLoginForm() {
     const form = document.getElementById('loginForm');
     if (!form) return;
+
+    // If user is already authenticated, redirect to dashboard or redirect param
+    const cachedUser = await checkAuth();
+    if (cachedUser) {
+      const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || 'dashboard.html';
+      window.location.href = redirectUrl;
+      return;
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -154,8 +214,10 @@
         });
 
         setLoggedIn(true);
+        sessionStorage.setItem('bv_user', JSON.stringify(data.data.user));
         toast(`Welcome back, ${data.data.user.name}!`);
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || 'dashboard.html';
+        setTimeout(() => { window.location.href = redirectUrl; }, 600);
       } catch (err) {
         toast(err.message, 'error');
         setButtonLoading(btn, false);
@@ -167,6 +229,13 @@
   async function initRegisterForm() {
     const form = document.getElementById('registerForm');
     if (!form) return;
+
+    // If user is already authenticated, redirect to dashboard
+    const cachedUser = await checkAuth();
+    if (cachedUser) {
+      window.location.href = 'dashboard.html';
+      return;
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -193,8 +262,9 @@
         });
 
         setLoggedIn(true);
+        sessionStorage.setItem('bv_user', JSON.stringify(data.data.user));
         toast('Account created! Welcome to BlogVerse.');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
       } catch (err) {
         toast(err.message, 'error');
         setButtonLoading(btn, false);
@@ -206,6 +276,16 @@
   async function initCreateBlogForm() {
     const form = document.getElementById('createBlogForm');
     if (!form) return;
+
+    // Route guard: user must be logged in to write or edit
+    const user = await requireAuth();
+    if (!user) return;
+
+    // Populate author badge in sidebar
+    const authorNameEl = document.getElementById('editorAuthorName');
+    if (authorNameEl) authorNameEl.textContent = user.name || 'Author';
+    const authorUserEl = document.getElementById('editorAuthorUsername');
+    if (authorUserEl) authorUserEl.textContent = `@${user.username || 'author'}`;
 
     const editId = new URLSearchParams(window.location.search).get('edit');
 
@@ -301,63 +381,114 @@
     }
   }
 
-  // ---- Dashboard ----
+  // ---- Dashboard (Protected Route + User Profile + User Blogs Only) ----
   async function initDashboard() {
     const postsContainer = document.getElementById('dashPostsBody');
     if (!postsContainer) return;
 
-    // Try loading user's posts from API; on 401, redirect to login
-    try {
-      const data = await apiFetch('/blogs/my?limit=20');
-      const blogs = data.data.blogs;
+    // 1. Protect private dashboard route
+    const user = await requireAuth();
+    if (!user) return;
 
-      if (!blogs || blogs.length === 0) {
-        postsContainer.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted); font-family:var(--font-mono); font-size:0.75rem;">
-              No articles yet. <a href="create-blog.html" style="color:var(--text-primary); text-decoration:underline;">Write your first post →</a>
+    // 2. Populate user profile and sidebar
+    const sidebarName = document.getElementById('sidebarUserName');
+    if (sidebarName) sidebarName.textContent = user.name || 'Author';
+
+    const sidebarRole = document.getElementById('sidebarUserRole');
+    if (sidebarRole) sidebarRole.textContent = `@${user.username} · ${user.role || 'author'}`;
+
+    const profileName = document.getElementById('profileName');
+    if (profileName) profileName.textContent = user.name || '—';
+
+    const profileUser = document.getElementById('profileUsername');
+    if (profileUser) profileUser.textContent = `@${user.username}`;
+
+    const profileEmail = document.getElementById('profileEmail');
+    if (profileEmail) profileEmail.textContent = user.email || '—';
+
+    const profileRole = document.getElementById('profileRole');
+    if (profileRole) profileRole.textContent = (user.role || 'author').toUpperCase();
+
+    const profileInitial = document.getElementById('profileAvatarInitial');
+    if (profileInitial) profileInitial.textContent = (user.name || 'A').charAt(0).toUpperCase();
+
+    const pageSub = document.getElementById('dashPageSub');
+    if (pageSub) pageSub.textContent = `Welcome back, ${user.name}. Here is your publication at a glance.`;
+
+    // 3. Stats helper
+    function renderStats(blogList) {
+      const totalEl     = document.getElementById('statTotal');
+      const viewsEl     = document.getElementById('statViews');
+      const publishedEl = document.getElementById('statPublished');
+      const draftsEl    = document.getElementById('statDrafts');
+
+      const totalViews = blogList.reduce((acc, b) => acc + (b.views || 0), 0);
+      const publishedCount = blogList.filter(b => b.status === 'published').length;
+      const draftCount = blogList.filter(b => b.status === 'draft').length;
+
+      if (totalEl) totalEl.textContent = blogList.length;
+      if (viewsEl) viewsEl.textContent = totalViews.toLocaleString();
+      if (publishedEl) publishedEl.textContent = publishedCount;
+      if (draftsEl) draftsEl.textContent = draftCount;
+    }
+
+    // 4. Retrieve and display ONLY the logged-in user's blogs
+    try {
+      const data = await apiFetch('/blogs/my?limit=50&sort=-createdAt');
+      let blogs = data.data.blogs || [];
+
+      renderStats(blogs);
+
+      function renderTable() {
+        if (!blogs || blogs.length === 0) {
+          postsContainer.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center; padding:2.5rem; color:var(--text-muted); font-family:var(--font-mono); font-size:0.75rem;">
+                You haven't written any articles yet. <a href="create-blog.html" style="color:var(--text-primary); text-decoration:underline;">Write your first post →</a>
+              </td>
+            </tr>`;
+          return;
+        }
+
+        postsContainer.innerHTML = blogs.map(b => `
+          <tr data-id="${escapeHtml(b._id)}">
+            <td class="td-title">${escapeHtml(b.title)}</td>
+            <td class="td-category">${escapeHtml(b.category)}</td>
+            <td><span class="status-tag ${b.status === 'published' ? 'published' : ''}">${escapeHtml(b.status)}</span></td>
+            <td style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">${b.status === 'published' ? formatDate(b.updatedAt) : '—'}</td>
+            <td style="font-family:var(--font-mono); font-size:0.85rem;">${(b.views || 0).toLocaleString()}</td>
+            <td style="text-align:right;">
+              <div class="row-actions" style="justify-content:flex-end;">
+                <a href="create-blog.html?edit=${escapeHtml(b._id)}" class="btn btn-ghost btn-sm">Edit</a>
+                <a href="blog-detail.html?id=${escapeHtml(b._id)}" class="btn btn-ghost btn-sm">View</a>
+                <button type="button" class="btn btn-ghost btn-sm action-btn delete" data-id="${escapeHtml(b._id)}">Delete</button>
+              </div>
             </td>
-          </tr>`;
-        return;
+          </tr>
+        `).join('');
+
+        // Attach delete listeners
+        postsContainer.querySelectorAll('.action-btn.delete').forEach(btn => {
+          btn.addEventListener('click', async function () {
+            const id    = this.dataset.id;
+            const row   = this.closest('tr');
+            const title = row?.querySelector('.td-title')?.textContent.trim() || 'this article';
+            if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+
+            try {
+              await apiFetch(`/blogs/${id}`, { method: 'DELETE' });
+              blogs = blogs.filter(b => b._id !== id);
+              renderStats(blogs);
+              renderTable();
+              toast('Article deleted successfully.');
+            } catch (err) {
+              toast(err.message, 'error');
+            }
+          });
+        });
       }
 
-      postsContainer.innerHTML = blogs.map(b => `
-        <tr data-id="${escapeHtml(b._id)}">
-          <td class="td-title">${escapeHtml(b.title)}</td>
-          <td class="td-category">${escapeHtml(b.category)}</td>
-          <td><span class="status-tag ${b.status === 'published' ? 'published' : ''}">${escapeHtml(b.status)}</span></td>
-          <td style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">${b.status === 'published' ? formatDate(b.updatedAt) : '—'}</td>
-          <td style="font-family:var(--font-mono); font-size:0.85rem;">${b.views || 0}</td>
-          <td style="text-align:right;">
-            <div class="row-actions" style="justify-content:flex-end;">
-              <a href="create-blog.html?edit=${escapeHtml(b._id)}" class="btn btn-ghost btn-sm">Edit</a>
-              <a href="blog-detail.html?id=${escapeHtml(b._id)}" class="btn btn-ghost btn-sm">View</a>
-              <button type="button" class="btn btn-ghost btn-sm action-btn delete" data-id="${escapeHtml(b._id)}">Delete</button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-
-      // Attach delete listeners
-      postsContainer.querySelectorAll('.action-btn.delete').forEach(btn => {
-        btn.addEventListener('click', async function () {
-          const id    = this.dataset.id;
-          const title = this.closest('tr')?.querySelector('.td-title')?.textContent.trim();
-          if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-
-          try {
-            await apiFetch(`/blogs/${id}`, { method: 'DELETE' });
-            this.closest('tr').remove();
-            toast('Article deleted.');
-          } catch (err) {
-            toast(err.message, 'error');
-          }
-        });
-      });
-
-      // Update stat cards
-      const totalEl = document.getElementById('statTotal');
-      if (totalEl) totalEl.textContent = data.total || blogs.length;
+      renderTable();
 
     } catch (err) {
       if (err.message.toLowerCase().includes('log in') || err.message.includes('401')) {
@@ -366,6 +497,7 @@
         toast(err.message, 'error');
       }
     }
+  }
   }
 
   // ---- Homepage blog feed with Search & Category Filters ----
@@ -451,14 +583,17 @@
   // ---- Logout button ----
   function initLogout() {
     document.querySelectorAll('.logout-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.onclick = async (e) => {
         e.preventDefault();
         try {
           await apiFetch('/auth/logout', { method: 'POST' });
         } catch (_) { /* ignore */ }
         setLoggedIn(false);
-        window.location.href = 'login.html';
-      });
+        toast('Logged out successfully.');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 400);
+      };
     });
   }
 
@@ -707,6 +842,14 @@
     initDashboard();
     initHomeFeed();
     initBlogDetail();
+
+    // Sync auth status dynamically to update navbar and user states
+    checkAuth().then(user => {
+      if (user) {
+        updateAuthNav(user);
+        initLogout();
+      }
+    });
   });
 
 })();
