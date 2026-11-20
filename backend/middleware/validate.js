@@ -144,4 +144,14 @@ exports.validatePagination = [
     .optional()
     .isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50.')
     .toInt(),
+  query('search')
+    .optional()
+    .trim()
+    .isLength({ max: 100 }).withMessage('Search query too long.'),
+  query('category')
+    .optional()
+    .trim()
+    .toLowerCase()
+    .isIn(['technology', 'design', 'career', 'lifestyle', 'all'])
+    .withMessage('Invalid category filter.'),
 ];

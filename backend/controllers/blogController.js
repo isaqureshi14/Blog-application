@@ -13,7 +13,21 @@ exports.getAllBlogs = async (req, res, next) => {
     const filter = { status: 'published' };
 
     // Safe category filter — whitelist enforced by validator
-    if (req.query.category) filter.category = req.query.category;
+    if (req.query.category && req.query.category !== 'all') {
+      filter.category = req.query.category;
+    }
+
+    // Safe text search filter with regex escaping to prevent ReDoS / injection
+    if (req.query.search && typeof req.query.search === 'string') {
+      const sanitizedSearch = req.query.search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (sanitizedSearch) {
+        filter.$or = [
+          { title: { $regex: sanitizedSearch, $options: 'i' } },
+          { excerpt: { $regex: sanitizedSearch, $options: 'i' } },
+          { content: { $regex: sanitizedSearch, $options: 'i' } },
+        ];
+      }
+    }
 
     // ---- Pagination ----
     const page  = Math.max(1, parseInt(req.query.page, 10)  || 1);

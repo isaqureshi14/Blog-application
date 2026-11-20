@@ -111,9 +111,13 @@
           <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border: 1px solid var(--border); color: var(--text-secondary);">#ACCESSIBILITY</span>
         </div>
 
-        <button type="button" class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(window.location.href); alert('Article URL copied to clipboard!');">
-          Share Article
-        </button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <a id="editArticleBtn" href="create-blog.html" class="btn btn-ghost btn-sm">Edit article</a>
+          <button id="deleteArticleBtn" type="button" class="btn btn-danger btn-sm">Delete article</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(window.location.href); alert('Article URL copied to clipboard!');">
+            Share Article
+          </button>
+        </div>
       </div>
 
       <!-- Author Bio Box -->

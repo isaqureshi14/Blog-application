@@ -110,7 +110,7 @@ app.use(xss);
 
 // ── 10. HTTP Parameter Pollution protection ───────────────────────────
 // Prevents duplicate query params being used to bypass validation.
-app.use(hpp({ whitelist: ['sort', 'fields', 'page', 'limit', 'category'] }));
+app.use(hpp({ whitelist: ['sort', 'fields', 'page', 'limit', 'category', 'search'] }));
 
 // ── 11. Global rate limiter (all routes) ─────────────────────────────
 const globalLimiter = rateLimit({

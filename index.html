@@ -125,13 +125,20 @@
   <section class="feed-section" id="explore">
     <div class="container">
 
-      <!-- Filter Bar (sticky) -->
+      <!-- Filter Bar with Category Pills & Live Search -->
       <div class="filter-bar" style="margin: 0 -2rem; padding: 0 2rem;">
-        <div class="filter-bar-inner">
-          <button class="filter-pill active" data-category="all">All articles</button>
-          <button class="filter-pill" data-category="tech">Technology</button>
-          <button class="filter-pill" data-category="design">Design</button>
-          <button class="filter-pill" data-category="career">Career</button>
+        <div class="filter-bar-inner" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; overflow-x: auto;">
+            <button class="filter-pill active" data-category="all">All articles</button>
+            <button class="filter-pill" data-category="technology">Technology</button>
+            <button class="filter-pill" data-category="design">Design</button>
+            <button class="filter-pill" data-category="career">Career</button>
+            <button class="filter-pill" data-category="lifestyle">Lifestyle</button>
+          </div>
+          <div style="display: flex; align-items: center; padding: 0 1rem; border-left: 1px solid var(--border);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="margin-right: 0.5rem; flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="blogSearchInput" placeholder="Search articles..." style="border: none; background: transparent; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.05em; outline: none; width: 170px;">
+          </div>
         </div>
       </div>
 
@@ -145,7 +152,7 @@
       <div class="posts-list" id="postsFeed">
 
         <!-- Post 1 -->
-        <a href="blog-detail.html" class="post-row" data-category="tech">
+        <a href="blog-detail.html" class="post-row" data-category="technology">
           <div class="post-row-date">Nov 18<br>2026</div>
           <div class="post-row-body">
             <div class="post-row-category">Technology</div>
@@ -199,7 +206,7 @@
         </a>
 
         <!-- Post 4 -->
-        <a href="blog-detail.html" class="post-row" data-category="tech">
+        <a href="blog-detail.html" class="post-row" data-category="technology">
           <div class="post-row-date">Nov 08<br>2026</div>
           <div class="post-row-body">
             <div class="post-row-category">Technology</div>

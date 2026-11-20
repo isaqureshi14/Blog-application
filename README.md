@@ -26,6 +26,7 @@ A production-ready, security-hardened blogging platform built with **pure HTML5/
 - **Stateless Authentication:** JWT issued inside **`httpOnly`, `SameSite=Strict`, `Secure`** cookies to defend against XSS-based token theft.
 - **Password Security:** Salted hashes generated via **`bcryptjs` (12 rounds)**; passwords excluded from queries by default (`select: false`).
 - **CRUD REST API:** Endpoints for user authentication and blog post lifecycle (creation, reading, updating, deletion, and author isolation).
+- **Search & Category Filtering:** Instant debounced keyword search across titles, excerpts, and contents (`?search=...`) alongside categorical taxonomy filtering (`?category=...`).
 
 ---
 

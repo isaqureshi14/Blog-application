@@ -202,10 +202,46 @@
     });
   }
 
-  // ---- Create Blog form ----
+  // ---- Create & Update Blog form (CRUD: Create & Update) ----
   async function initCreateBlogForm() {
     const form = document.getElementById('createBlogForm');
     if (!form) return;
+
+    const editId = new URLSearchParams(window.location.search).get('edit');
+
+    // Pre-populate if in edit mode
+    if (editId) {
+      try {
+        const res = await apiFetch(`/blogs/${encodeURIComponent(editId)}`);
+        const blog = res.data?.blog;
+        if (blog) {
+          const topbarLabel = document.querySelector('.editor-topbar-label');
+          if (topbarLabel) topbarLabel.textContent = 'Edit article';
+
+          const titleInput = document.getElementById('postTitle');
+          if (titleInput) titleInput.value = blog.title || '';
+
+          const contentInput = document.getElementById('postContent');
+          if (contentInput) contentInput.value = blog.content || '';
+
+          const excerptInput = document.getElementById('postExcerpt');
+          if (excerptInput) excerptInput.value = blog.excerpt || '';
+
+          const categorySelect = document.getElementById('postCategory');
+          if (categorySelect) categorySelect.value = blog.category || '';
+
+          const tagsInput = document.getElementById('postTags');
+          if (tagsInput) tagsInput.value = (blog.tags || []).join(', ');
+
+          const submitBtns = form.querySelectorAll('button[type="submit"]');
+          submitBtns.forEach(btn => {
+            btn.textContent = blog.status === 'published' ? 'Update published' : 'Update article';
+          });
+        }
+      } catch (err) {
+        toast('Failed to load article: ' + err.message, 'error');
+      }
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -229,16 +265,25 @@
       }
 
       try {
-        await apiFetch('/blogs', {
-          method: 'POST',
-          body:   { title, content, excerpt, category, tags, status },
-        });
+        if (editId) {
+          // UPDATE (U in CRUD)
+          await apiFetch(`/blogs/${encodeURIComponent(editId)}`, {
+            method: 'PATCH',
+            body:   { title, content, excerpt, category, tags, status },
+          });
+          toast('Article updated successfully!');
+        } else {
+          // CREATE (C in CRUD)
+          await apiFetch('/blogs', {
+            method: 'POST',
+            body:   { title, content, excerpt, category, tags, status },
+          });
+          toast(status === 'published' ? 'Article published!' : 'Draft saved.');
+        }
 
-        toast(status === 'published' ? 'Article published!' : 'Draft saved.');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
       } catch (err) {
-        // If 401, redirect to login
-        if (err.message.toLowerCase().includes('log in')) {
+        if (err.message.toLowerCase().includes('log in') || err.message.includes('401')) {
           window.location.href = 'login.html';
           return;
         }
@@ -250,8 +295,7 @@
     // "Save Draft" button
     const draftBtn = form.querySelector('.save-draft-btn');
     if (draftBtn) {
-      draftBtn.addEventListener('click', (e) => {
-        document.getElementById('blogStatus')?.setAttribute('value', 'draft');
+      draftBtn.addEventListener('click', () => {
         form.requestSubmit();
       });
     }
@@ -324,17 +368,30 @@
     }
   }
 
-  // ---- Homepage blog feed ----
-  async function initHomeFeed() {
+  // ---- Homepage blog feed with Search & Category Filters ----
+  async function loadHomeFeed(category = 'all', searchQuery = '') {
     const feedList = document.getElementById('postsFeed');
+    const countEl = document.querySelector('.feed-count');
     if (!feedList) return;
 
     try {
-      const data  = await apiFetch('/blogs?limit=10&sort=-createdAt');
+      let url = `/blogs?limit=20&sort=-createdAt`;
+      if (category && category !== 'all') {
+        url += `&category=${encodeURIComponent(category)}`;
+      }
+      if (searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+
+      const data = await apiFetch(url);
       const blogs = data.data.blogs;
 
+      if (countEl) {
+        countEl.textContent = `${blogs.length} article${blogs.length === 1 ? '' : 's'}`;
+      }
+
       if (!blogs || blogs.length === 0) {
-        feedList.innerHTML = `<p style="padding:2rem 0; color:var(--text-muted); font-size:0.9rem;">No articles published yet.</p>`;
+        feedList.innerHTML = `<p style="padding:2.5rem 0; color:var(--text-muted); font-size:0.9rem;">No articles match your search or filter criteria.</p>`;
         return;
       }
 
@@ -353,10 +410,41 @@
           ${b.coverImage ? `<img class="post-row-thumb" src="${escapeHtml(b.coverImage)}" alt="">` : ''}
         </a>
       `).join('');
-
     } catch (err) {
-      // Feed load failure is non-critical — keep static demo visible
       console.warn('[BlogVerse] Feed load failed:', err.message);
+    }
+  }
+
+  function initHomeFeed() {
+    const feedList = document.getElementById('postsFeed');
+    if (!feedList) return;
+
+    let activeCategory = 'all';
+    let currentSearch = '';
+    let debounceTimer = null;
+
+    loadHomeFeed(activeCategory, currentSearch);
+
+    // Category filter pills
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeCategory = pill.dataset.category || 'all';
+        loadHomeFeed(activeCategory, currentSearch);
+      });
+    });
+
+    // Live search input with debounce
+    const searchInput = document.getElementById('blogSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          currentSearch = e.target.value.trim();
+          loadHomeFeed(activeCategory, currentSearch);
+        }, 250);
+      });
     }
   }
 
@@ -430,6 +518,28 @@
         tagsEl.innerHTML = blog.tags.map(t => `
           <span style="font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.6rem; border: 1px solid var(--border); color: var(--text-secondary);">#${escapeHtml(t)}</span>
         `).join('');
+      }
+
+      // Edit & Delete actions on blog detail page (CRUD: Update & Delete)
+      const editBtn = document.getElementById('editArticleBtn');
+      if (editBtn) {
+        editBtn.href = `create-blog.html?edit=${encodeURIComponent(blog._id)}`;
+        editBtn.style.display = 'inline-flex';
+      }
+
+      const deleteBtn = document.getElementById('deleteArticleBtn');
+      if (deleteBtn) {
+        deleteBtn.style.display = 'inline-flex';
+        deleteBtn.onclick = async () => {
+          if (!confirm(`Are you sure you want to delete "${blog.title}"?`)) return;
+          try {
+            await apiFetch(`/blogs/${encodeURIComponent(blog._id)}`, { method: 'DELETE' });
+            toast('Article deleted successfully.');
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+          } catch (err) {
+            toast('Delete failed: ' + err.message, 'error');
+          }
+        };
       }
     } catch (err) {
       console.warn('[BlogVerse] Failed to fetch article details:', err.message);
